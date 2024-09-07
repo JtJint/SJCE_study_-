@@ -1,0 +1,135 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using System;
+
+public class NewBehaviourScript : MonoBehaviour
+{
+    public Text txt_result;
+    public Text txt_DataBox;
+    private string strNumber = "";
+    private List<int> inputNumberList = new List<int>();
+
+    void Start()
+    {
+
+    }
+
+    void Update()
+    {
+
+    }
+
+
+    public void dummyButton()
+    {
+        txt_DataBox.text = "0";
+    }
+    public void onClickResultButton()
+    {
+        string expression = txt_DataBox.text;
+        List<dynamic> postfix = convertPost(expression);
+        print(string.Join(" ",postfix));
+        int result = evaluatePostfix(postfix);
+        txt_result.text = result.ToString();
+        txt_DataBox.text = "0";
+        
+    }
+
+    public void onClickNumber(string inputNumber)
+    {
+        strNumber += inputNumber;
+        if (txt_DataBox.text == "0")
+        {
+            txt_DataBox.text = "";
+        }
+        txt_DataBox.text += inputNumber;
+    }
+
+    public void onClickOperation(string operat)
+    {
+        txt_DataBox.text += operat;
+        strNumber = "";
+    }
+
+    public List<dynamic> convertPost(string expression)
+    {
+        Stack<char> stack = new Stack<char>();
+        List<dynamic> rt = new List<dynamic>();
+        int tmp = 0;
+        
+        foreach (char c in expression)
+        {
+            if ('0' <= c && c <= '9')
+            {
+                tmp = tmp * 10 + (c - '0');
+                
+                
+            }
+            else
+            {
+                rt.Add(tmp); // 마지막으로 읽은 숫자를 추가
+                tmp = 0;
+
+                while (stack.Count > 0 && Precedence(stack.Peek()) >= Precedence(c))
+                {
+                    rt.Add(stack.Pop());
+                }
+                stack.Push(c);
+            }
+        }
+
+        rt.Add(tmp);
+        // 마지막 숫자 추가
+        // 나머지 스택 비우기        
+        while (stack.Count > 0)
+        {
+            rt.Add(stack.Pop());
+        }
+
+        return rt;
+    }
+
+    public int Precedence(char op)
+    {
+        if (op == '+' || op == '-') return 1;
+        if (op == '*' || op == '/') return 2;
+        return 0;
+    }
+
+    public int evaluatePostfix(List<object> postFix)
+    {
+        Stack<int> numberStack = new Stack<int>();
+        
+        foreach (var token in postFix)
+        {
+            print(token);
+            if (token is int number)
+            {
+                numberStack.Push(number);
+            }
+            else if (token is char op)
+            {
+                if (op == '+' || op == '-' || op == '/' || op == '*')
+                {
+                    int number2 = numberStack.Pop();
+                    int number1 = numberStack.Pop();
+
+                    if (op == '*') numberStack.Push(number1 * number2);
+                    if (op == '-') numberStack.Push(number1 - number2);
+                    if (op == '+') numberStack.Push(number1 + number2);
+                    if (op == '/') numberStack.Push(number1 / number2);
+                }
+            }
+            
+        }
+
+        // 마지막 남은 숫자를 반환
+        return numberStack.Pop();
+    }
+
+
+
+
+}
